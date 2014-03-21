@@ -131,10 +131,12 @@ public class PinnedSectionListView extends ListView {
 	/** Default change observer. */
     private final DataSetObserver mDataSetObserver = new DataSetObserver() {
         @Override public void onChanged() {
-            recreatePinnedShadow();
+        	post(recreatePinnedShadow);
+//            recreatePinnedShadow();
         };
         @Override public void onInvalidated() {
-            recreatePinnedShadow();
+        	post(recreatePinnedShadow);
+//            recreatePinnedShadow();
         }
     };
 
@@ -279,6 +281,9 @@ public class PinnedSectionListView extends ListView {
 		ListAdapter adapter = getAdapter();
 		for (int childIndex = 0; childIndex < visibleItemCount; childIndex++) {
 			int position = firstVisibleItem + childIndex;
+			if (position >= adapter.getCount()) {
+				continue;
+			}
 			int viewType = adapter.getItemViewType(position);
 			if (isItemViewTypePinned(adapter, viewType)) return position;
 		}
@@ -306,6 +311,13 @@ public class PinnedSectionListView extends ListView {
 		}
 		return -1; // no candidate found
 	}
+	
+	Runnable recreatePinnedShadow = new Runnable() {
+		@Override
+		public void run() {
+			recreatePinnedShadow();
+		}
+	};
 
 	void recreatePinnedShadow() {
 	    destroyPinnedShadow();
